@@ -1,42 +1,59 @@
-import { WorkoutSession, MealLog } from "./types";
+import { SwipeRecord, UserPreferences, DEFAULT_PREFERENCES } from './types';
 
-const WORKOUTS_KEY = "sundapp_workouts";
-const MEALS_KEY = "sundapp_meals";
+const SWIPE_KEY = 'boligswipe_history';
+const PREFS_KEY = 'boligswipe_prefs';
 
-export function getWorkouts(): WorkoutSession[] {
-  if (typeof window === "undefined") return [];
-  const data = localStorage.getItem(WORKOUTS_KEY);
-  return data ? JSON.parse(data) : [];
+export function getSwipeHistory(): SwipeRecord[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(SWIPE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
 }
 
-export function saveWorkout(session: WorkoutSession): void {
-  const sessions = getWorkouts();
-  const idx = sessions.findIndex((s) => s.id === session.id);
-  if (idx >= 0) sessions[idx] = session;
-  else sessions.unshift(session);
-  localStorage.setItem(WORKOUTS_KEY, JSON.stringify(sessions));
+export function addSwipe(record: SwipeRecord): void {
+  const history = getSwipeHistory();
+  history.push(record);
+  localStorage.setItem(SWIPE_KEY, JSON.stringify(history));
 }
 
-export function deleteWorkout(id: string): void {
-  const sessions = getWorkouts().filter((s) => s.id !== id);
-  localStorage.setItem(WORKOUTS_KEY, JSON.stringify(sessions));
+export function removeLastSwipe(): SwipeRecord | null {
+  const history = getSwipeHistory();
+  if (history.length === 0) return null;
+  const last = history.pop()!;
+  localStorage.setItem(SWIPE_KEY, JSON.stringify(history));
+  return last;
 }
 
-export function getMeals(): MealLog[] {
-  if (typeof window === "undefined") return [];
-  const data = localStorage.getItem(MEALS_KEY);
-  return data ? JSON.parse(data) : [];
+export function getLikedIds(): Set<string> {
+  return new Set(
+    getSwipeHistory()
+      .filter((r) => r.liked)
+      .map((r) => r.propertyId)
+  );
 }
 
-export function saveMeal(meal: MealLog): void {
-  const meals = getMeals();
-  const idx = meals.findIndex((m) => m.id === meal.id);
-  if (idx >= 0) meals[idx] = meal;
-  else meals.unshift(meal);
-  localStorage.setItem(MEALS_KEY, JSON.stringify(meals));
+export function getSeenIds(): Set<string> {
+  return new Set(getSwipeHistory().map((r) => r.propertyId));
 }
 
-export function deleteMeal(id: string): void {
-  const meals = getMeals().filter((m) => m.id !== id);
-  localStorage.setItem(MEALS_KEY, JSON.stringify(meals));
+export function getPreferences(): UserPreferences {
+  if (typeof window === 'undefined') return DEFAULT_PREFERENCES;
+  try {
+    const raw = localStorage.getItem(PREFS_KEY);
+    return raw ? { ...DEFAULT_PREFERENCES, ...JSON.parse(raw) } : DEFAULT_PREFERENCES;
+  } catch {
+    return DEFAULT_PREFERENCES;
+  }
+}
+
+export function savePreferences(prefs: UserPreferences): void {
+  localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+}
+
+export function clearAll(): void {
+  localStorage.removeItem(SWIPE_KEY);
+  localStorage.removeItem(PREFS_KEY);
 }

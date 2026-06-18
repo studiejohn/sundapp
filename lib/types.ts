@@ -1,37 +1,80 @@
-export interface Exercise {
+export type PropertyType =
+  | 'villa'
+  | 'lejlighed'
+  | 'rækkehus'
+  | 'andelsbolig'
+  | 'landejendom'
+  | 'sommerhus';
+
+export type EnergyLabel = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+
+export interface Property {
   id: string;
-  name: string;
-  sets: Set[];
+  title: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  price: number;
+  monthlyPayment: number;
+  type: PropertyType;
+  area: number;
+  landArea?: number;
+  rooms: number;
+  bathrooms: number;
+  yearBuilt: number;
+  energyLabel: EnergyLabel;
+  images: string[];
+  description: string;
+  features: string[];
+  daysOnMarket: number;
+  agent: {
+    name: string;
+    company: string;
+    phone: string;
+  };
 }
 
-export interface Set {
-  id: string;
-  reps: number;
-  weight: number; // kg
+export interface SwipeRecord {
+  propertyId: string;
+  liked: boolean;
+  timestamp: number;
 }
 
-export interface WorkoutSession {
-  id: string;
-  date: string; // ISO date string
-  name: string;
-  exercises: Exercise[];
-  notes?: string;
+export interface UserPreferences {
+  minPrice: number;
+  maxPrice: number;
+  minRooms: number;
+  maxRooms: number;
+  types: PropertyType[];
+  minArea: number;
+  maxArea: number;
 }
 
-export interface FoodEntry {
-  id: string;
-  name: string;
-  amount: string; // e.g. "100g", "1 stk", "2 dl"
-  calories?: number;
-  protein?: number; // g
-  carbs?: number;   // g
-  fat?: number;     // g
-  nutritionLoaded: boolean;
-}
+export const DEFAULT_PREFERENCES: UserPreferences = {
+  minPrice: 0,
+  maxPrice: 10_000_000,
+  minRooms: 1,
+  maxRooms: 10,
+  types: ['villa', 'lejlighed', 'rækkehus', 'andelsbolig', 'landejendom', 'sommerhus'],
+  minArea: 0,
+  maxArea: 500,
+};
 
-export interface MealLog {
-  id: string;
-  date: string; // ISO date string
-  mealType: "morgenmad" | "frokost" | "aftensmad" | "snack";
-  foods: FoodEntry[];
-}
+export const PROPERTY_TYPE_LABELS: Record<PropertyType, string> = {
+  villa: 'Villa',
+  lejlighed: 'Lejlighed',
+  rækkehus: 'Rækkehus',
+  andelsbolig: 'Andelsbolig',
+  landejendom: 'Landejendom',
+  sommerhus: 'Sommerhus',
+};
+
+export const ENERGY_COLORS: Record<EnergyLabel, string> = {
+  A: '#1a7c3e',
+  B: '#4caf50',
+  C: '#8bc34a',
+  D: '#ffeb3b',
+  E: '#ff9800',
+  F: '#f44336',
+  G: '#b71c1c',
+};
